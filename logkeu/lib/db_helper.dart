@@ -8,7 +8,6 @@ class DBHelper {
 
   DBHelper._privateConstructor();
 
-  // Inisialisasi database
   static Future<Database> get database async {
     if (_database != null) return _database!;
 
@@ -16,7 +15,6 @@ class DBHelper {
     return _database!;
   }
 
-  // Inisialisasi database
   static Future<Database> initDB() async {
     String path = join(await getDatabasesPath(), 'pencatat_keuangan.db');
 
@@ -24,7 +22,6 @@ class DBHelper {
       path,
       version: 1,
       onCreate: (db, version) async {
-        // Membuat tabel Dompet
         await db.execute('''
           CREATE TABLE dompet(
             idDompet INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +30,6 @@ class DBHelper {
           )
         ''');
 
-        // Membuat tabel Pengeluaran
         await db.execute('''
           CREATE TABLE pengeluaran(
             idPengeluaran INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +42,6 @@ class DBHelper {
           )
         ''');
 
-        // Membuat tabel Pemasukan
         await db.execute('''
           CREATE TABLE pemasukan(
             idPemasukan INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,7 +97,6 @@ class DBHelper {
     );
   }
 
-  // Mengambil semua dompet dari database
   static Future<List<Dompet>> getDompetList() async {
     try {
       final db = await database;
@@ -120,13 +114,11 @@ class DBHelper {
     }
   }
 
-  // Menambahkan dompet baru ke database
   static Future<int> insertDompet(Dompet dompet) async {
     final db = await database;
     return await db.insert('dompet', dompet.toMap());
   }
 
-  // Update dompet setelah perubahan jumlah uang
   static Future<int> updateDompet(Dompet dompet) async {
     final db = await database;
     return await db.update(
@@ -137,7 +129,6 @@ class DBHelper {
     );
   }
 
-  // Menghapus dompet
   static Future<int> deleteDompet(int id) async {
     final db = await database;
     return await db.delete(

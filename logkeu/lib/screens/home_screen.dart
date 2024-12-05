@@ -198,8 +198,7 @@ class _DetailDompetState extends State<DetailDompet> {
   void _refreshList() {
     setState(() {
       _pemasukanList = DBHelper.getPemasukanByDompet(widget.dompet.idDompet!);
-      _pengeluaranList =
-          DBHelper.getPengeluaranByDompet(widget.dompet.idDompet!);
+      _pengeluaranList = DBHelper.getPengeluaranByDompet(widget.dompet.idDompet!);
     });
   }
 
@@ -222,6 +221,17 @@ class _DetailDompetState extends State<DetailDompet> {
       appBar: AppBar(
         title: Text(widget.dompet.namaDompet,
             style: TextStyle(fontFamily: 'Lato')),
+          actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.delete,
+              color: Color.fromARGB(255, 255, 20, 3),
+            ),
+            onPressed: () {
+              _showDeleteConfirmation(context);
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -268,7 +278,6 @@ class _DetailDompetState extends State<DetailDompet> {
 
                     return ListView(
                       children: [
-                        // Pemasukan list
                         ...pemasukanList.map((data) {
                           final pemasukan = Pemasukan.fromMap(data);
                           return ListTile(
@@ -284,7 +293,6 @@ class _DetailDompetState extends State<DetailDompet> {
                             ),
                           );
                         }).toList(),
-                        // Pengeluaran list
                         ...pengeluaranList.map((data) {
                           final pengeluaran = Pengeluaran.fromMap(data);
                           return ListTile(
@@ -313,14 +321,13 @@ class _DetailDompetState extends State<DetailDompet> {
     );
   }
 
-  Future<void> _deletePemasukan(int idPemasukan) async {
-    await DBHelper.deletePemasukan(idPemasukan);
+  Future<void> _deletePengeluaran(int idPengeluaran) async {
+    await DBHelper.deletePengeluaran(idPengeluaran);
     _refreshList();
   }
 
-// Fungsi untuk menghapus pengeluaran
-  Future<void> _deletePengeluaran(int idPengeluaran) async {
-    await DBHelper.deletePengeluaran(idPengeluaran);
+  Future<void> _deletePemasukan(int idPemasukan) async {
+    await DBHelper.deletePemasukan(idPemasukan);
     _refreshList();
   }
 
@@ -330,7 +337,9 @@ class _DetailDompetState extends State<DetailDompet> {
       MaterialPageRoute(
         builder: (_) => TambahPemasukan(dompetId: widget.dompet.idDompet!),
       ),
-    ).then((_) => _refreshList());
+    ).then((result) {
+      if (result == true) _refreshList();
+    });
   }
 
   void _navigateToTambahPengeluaran(BuildContext context) {
@@ -339,7 +348,9 @@ class _DetailDompetState extends State<DetailDompet> {
       MaterialPageRoute(
         builder: (_) => TambahPengeluaran(dompetId: widget.dompet.idDompet!),
       ),
-    ).then((_) => _refreshList());
+    ).then((result) {
+      if (result == true) _refreshList();
+    });
   }
 
   void _showDeleteConfirmation(BuildContext context) {
@@ -408,7 +419,6 @@ class TambahPengeluaran extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                // Validasi input
                 if (_judulController.text.isEmpty ||
                     _jumlahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -417,17 +427,16 @@ class TambahPengeluaran extends StatelessWidget {
                   return;
                 }
 
-                // Simpan pengeluaran ke database
                 final pengeluaran = Pengeluaran(
                   idDompet: dompetId,
                   judul: _judulController.text,
-                  kategori:
-                      'Lainnya', // Tambahkan logika kategori jika diperlukan
+                  kategori: 'Lainnya',
                   tanggalDibuat: DateTime.now(),
                   jumlahUang: double.tryParse(_jumlahController.text) ?? 0.0,
                 );
                 await DBHelper.insertPengeluaran(pengeluaran.toMap());
-                Navigator.pop(context); // Kembali ke halaman sebelumnya
+
+                Navigator.pop(context, true);
               },
               child: Text('Simpan', style: TextStyle(fontFamily: 'Lato')),
             ),
@@ -464,6 +473,13 @@ class TambahPemasukan extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
+                if (_judulController.text.isEmpty ||
+                    _jumlahController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Semua kolom wajib diisi')),
+                  );
+                  return;
+                }
                 final pemasukan = Pemasukan(
                   idDompet: dompetId,
                   judul: _judulController.text,
@@ -472,7 +488,7 @@ class TambahPemasukan extends StatelessWidget {
                   jumlahUang: double.tryParse(_jumlahController.text) ?? 0.0,
                 );
                 await DBHelper.insertPemasukan(pemasukan.toMap());
-                Navigator.pop(context);
+                Navigator.pop(context, true);
               },
               child: Text('Simpan'),
             ),

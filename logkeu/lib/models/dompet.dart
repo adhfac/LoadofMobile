@@ -9,7 +9,6 @@ class Dompet {
     required this.jumlahUang,
   });
 
-  // Mengonversi objek Dompet ke Map (untuk penyimpanan di SQLite)
   Map<String, dynamic> toMap() {
     return {
       'idDompet': idDompet,
@@ -18,7 +17,6 @@ class Dompet {
     };
   }
 
-  // Mengonversi Map ke objek Dompet
   factory Dompet.fromMap(Map<String, dynamic> map) {
     return Dompet(
       idDompet: map['idDompet'],

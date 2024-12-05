@@ -15,7 +15,6 @@ class Pengeluaran {
     required this.jumlahUang,
   });
 
-  // Mengonversi objek Pengeluaran ke Map (untuk penyimpanan di SQLite)
   Map<String, dynamic> toMap() {
     return {
       'idPengeluaran': idPengeluaran,
@@ -27,7 +26,6 @@ class Pengeluaran {
     };
   }
 
-  // Mengonversi Map ke objek Pengeluaran
   factory Pengeluaran.fromMap(Map<String, dynamic> map) {
     return Pengeluaran(
       idPengeluaran: map['idPengeluaran'],
