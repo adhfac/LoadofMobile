@@ -157,7 +157,8 @@ class DBHelper {
     );
     if (dompet.isNotEmpty) {
       double saldoSekarang = dompet.first['jumlahUang'] as double;
-      double jumlahPemasukan = pemasukan['jumlahUang']; // Pastikan 'jumlah' ada di pemasukan
+      double jumlahPemasukan =
+          pemasukan['jumlahUang']; // Pastikan 'jumlah' ada di pemasukan
 
       double saldoBaru = saldoSekarang + jumlahPemasukan;
 
@@ -171,9 +172,25 @@ class DBHelper {
     return await db.insert('pemasukan', pemasukan);
   }
 
-// Menghapus pemasukan
   static Future<int> deletePemasukan(int id) async {
     final db = await database;
+
+    final pemasukan = await db.query(
+      'pemasukan',
+      where: 'idPemasukan = ?',
+      whereArgs: [id],
+    );
+
+    if (pemasukan.isNotEmpty) {
+      final jumlahUang = pemasukan.first['jumlahUang'];
+      final idDompet = pemasukan.first['idDompet'];
+
+      await db.execute(
+        'UPDATE dompet SET jumlahUang = jumlahUang - ? WHERE idDompet = ?',
+        [jumlahUang, idDompet],
+      );
+    }
+
     return await db.delete(
       'pemasukan',
       where: 'idPemasukan = ?',
@@ -181,7 +198,6 @@ class DBHelper {
     );
   }
 
-// Mendapatkan daftar pemasukan berdasarkan idDompet
   static Future<List<Map<String, dynamic>>> getPemasukanByDompet(
       int idDompet) async {
     final db = await database;
@@ -202,7 +218,8 @@ class DBHelper {
     );
     if (dompet.isNotEmpty) {
       double saldoSekarang = dompet.first['jumlahUang'] as double;
-      double jumlahPengeluaran = pengeluaran['jumlahUang']; // Pastikan 'jumlah' ada di pemasukan
+      double jumlahPengeluaran =
+          pengeluaran['jumlahUang']; // Pastikan 'jumlah' ada di pemasukan
 
       double saldoBaru = saldoSekarang - jumlahPengeluaran;
 
@@ -218,6 +235,22 @@ class DBHelper {
 
   static Future<int> deletePengeluaran(int id) async {
     final db = await database;
+
+    final pengeluaran = await db.query(
+      'pengeluaran',
+      where: 'idPengeluaran = ?',
+      whereArgs: [id],
+    );
+
+    if (pengeluaran.isNotEmpty) {
+      final jumlahUang = pengeluaran.first['jumlahUang'];
+      final idDompet = pengeluaran.first['idDompet'];
+
+      await db.execute(
+        'UPDATE dompet SET jumlahUang = jumlahUang + ? WHERE idDompet = ?',
+        [jumlahUang, idDompet],
+      );
+    }
     return await db.delete(
       'pengeluaran',
       where: 'idPengeluaran = ?',

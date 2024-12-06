@@ -65,8 +65,8 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Dompet',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_applications_outlined),
-            label: 'Pengaturan',
+            icon: Icon(Icons.stacked_line_chart_rounded),
+            label: 'Lainnya',
           ),
         ],
         selectedLabelStyle: TextStyle(

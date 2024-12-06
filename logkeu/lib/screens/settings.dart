@@ -10,7 +10,7 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Pengaturan',
+          'No More Broke Boi',
           style: TextStyle(fontFamily: 'Lato'),
         ),
       ),

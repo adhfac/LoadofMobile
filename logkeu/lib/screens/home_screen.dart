@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Daftar Dompet',
+          'No More Broke Boi',
           style: TextStyle(fontFamily: 'Lato'),
         ),
       ),
@@ -198,7 +198,8 @@ class _DetailDompetState extends State<DetailDompet> {
   void _refreshList() {
     setState(() {
       _pemasukanList = DBHelper.getPemasukanByDompet(widget.dompet.idDompet!);
-      _pengeluaranList = DBHelper.getPengeluaranByDompet(widget.dompet.idDompet!);
+      _pengeluaranList =
+          DBHelper.getPengeluaranByDompet(widget.dompet.idDompet!);
     });
   }
 
@@ -221,7 +222,7 @@ class _DetailDompetState extends State<DetailDompet> {
       appBar: AppBar(
         title: Text(widget.dompet.namaDompet,
             style: TextStyle(fontFamily: 'Lato')),
-          actions: [
+        actions: [
           IconButton(
             icon: const Icon(
               Icons.delete,
@@ -238,26 +239,37 @@ class _DetailDompetState extends State<DetailDompet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Nama Dompet: ${widget.dompet.namaDompet}',
-              style: TextStyle(fontFamily: 'Lato'),
-            ),
+            Text('Nama Dompet: ${widget.dompet.namaDompet}',
+                style: TextStyle(fontFamily: 'Lato')),
             const SizedBox(height: 8),
-            Text(
-              'Saldo: ${formatUang(widget.dompet.jumlahUang)}',
-              style: TextStyle(fontFamily: 'Lato'),
-            ),
+            Text('Saldo: ${formatUang(widget.dompet.jumlahUang)}',
+                style: TextStyle(fontFamily: 'Lato')),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () => _navigateToTambahPemasukan(context),
-                  child: Text('Tambah Pemasukan'),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                        const Color.fromARGB(255, 91, 147, 0)),
+                  ),
+                  child: const Text(
+                    'Tambah Pemasukan',
+                    style: TextStyle(
+                      fontFamily: 'Lato',
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () => _navigateToTambahPengeluaran(context),
-                  child: Text('Tambah Pengeluaran'),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                        const Color.fromARGB(255, 136, 0, 0)),
+                  ),
+                  child: const Text('Tambah Pengeluaran',
+                      style: TextStyle(fontFamily: 'Lato', color: Colors.white)),
                 ),
               ],
             ),
@@ -269,7 +281,9 @@ class _DetailDompetState extends State<DetailDompet> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return Center(
+                        child: Text('Error: ${snapshot.error}',
+                            style: TextStyle(fontFamily: 'Lato')));
                   } else {
                     final pemasukanList =
                         snapshot.data[0] as List<Map<String, dynamic>>;
@@ -283,8 +297,10 @@ class _DetailDompetState extends State<DetailDompet> {
                           return ListTile(
                             leading:
                                 Icon(Icons.arrow_downward, color: Colors.green),
-                            title: Text(pemasukan.judul),
-                            subtitle: Text(formatUang(pemasukan.jumlahUang)),
+                            title: Text(pemasukan.judul,
+                                style: TextStyle(fontFamily: 'Lato')),
+                            subtitle: Text(formatUang(pemasukan.jumlahUang),
+                                style: TextStyle(fontFamily: 'Lato')),
                             trailing: IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),
                               onPressed: () async {
@@ -298,8 +314,10 @@ class _DetailDompetState extends State<DetailDompet> {
                           return ListTile(
                             leading:
                                 Icon(Icons.arrow_upward, color: Colors.red),
-                            title: Text(pengeluaran.judul),
-                            subtitle: Text(formatUang(pengeluaran.jumlahUang)),
+                            title: Text(pengeluaran.judul,
+                                style: TextStyle(fontFamily: 'Lato')),
+                            subtitle: Text(formatUang(pengeluaran.jumlahUang),
+                                style: TextStyle(fontFamily: 'Lato')),
                             trailing: IconButton(
                               icon: Icon(Icons.delete, color: Colors.red),
                               onPressed: () async {
@@ -383,33 +401,74 @@ class _DetailDompetState extends State<DetailDompet> {
   }
 }
 
-class TambahPengeluaran extends StatelessWidget {
+class TambahPengeluaran extends StatefulWidget {
   final int dompetId;
-  final TextEditingController _judulController = TextEditingController();
-  final TextEditingController _jumlahController = TextEditingController();
 
   TambahPengeluaran({required this.dompetId});
+
+  @override
+  _TambahPengeluaranState createState() => _TambahPengeluaranState();
+}
+
+class _TambahPengeluaranState extends State<TambahPengeluaran> {
+  final TextEditingController _judulController = TextEditingController();
+  final TextEditingController _jumlahController = TextEditingController();
+  String _selectedKategori = 'Makanan';
+  DateTime _selectedDate = DateTime.now();
+
+  final List<String> _kategoriList = [
+    'Makanan',
+    'Berbelanja',
+    'Hiburan',
+    'Rumah tangga',
+    'Keluarga',
+    'Kesehatan',
+    'Liburan',
+    'Tagihan',
+    'Lain'
+  ];
+
+  void _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.day}-${date.month}-${date.year}";
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tambah Pengeluaran', style: TextStyle(fontFamily: 'Lato')),
-      ),
+          title: Text(
+        'Tambah Pengeluaran',
+        style: TextStyle(fontFamily: 'Lato'),
+      )),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _judulController,
+              style: TextStyle(fontFamily: 'Lato'),
               decoration: InputDecoration(
-                labelText: 'Judul Pengeluaran',
+                labelText: 'Judul',
                 labelStyle: TextStyle(fontFamily: 'Lato'),
               ),
             ),
-            const SizedBox(height: 16),
             TextField(
               controller: _jumlahController,
+              style: TextStyle(fontFamily: 'Lato'),
               decoration: InputDecoration(
                 labelText: 'Jumlah Uang',
                 labelStyle: TextStyle(fontFamily: 'Lato'),
@@ -417,28 +476,76 @@ class TambahPengeluaran extends StatelessWidget {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedKategori,
+              items: _kategoriList.map((kategori) {
+                return DropdownMenuItem(
+                  value: kategori,
+                  child: Text(
+                    kategori,
+                    style: TextStyle(fontFamily: 'Lato'),
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedKategori = value!;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Kategori',
+                labelStyle: TextStyle(fontFamily: 'Lato'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Tanggal: ${_formatDate(_selectedDate)}',
+                    style: TextStyle(fontSize: 16, fontFamily: 'Lato'),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => _selectDate(context),
+                  child: Text(
+                    'Pilih Tanggal',
+                    style: TextStyle(fontFamily: 'Lato'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 if (_judulController.text.isEmpty ||
                     _jumlahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Semua kolom wajib diisi')),
+                    SnackBar(
+                        content: Text(
+                      'Semua kolom wajib diisi',
+                      style: TextStyle(fontFamily: 'Lato'),
+                    )),
                   );
                   return;
                 }
 
                 final pengeluaran = Pengeluaran(
-                  idDompet: dompetId,
+                  idDompet: widget.dompetId,
                   judul: _judulController.text,
-                  kategori: 'Lainnya',
-                  tanggalDibuat: DateTime.now(),
+                  kategori: _selectedKategori,
+                  tanggalDibuat: _selectedDate,
                   jumlahUang: double.tryParse(_jumlahController.text) ?? 0.0,
                 );
                 await DBHelper.insertPengeluaran(pengeluaran.toMap());
 
                 Navigator.pop(context, true);
               },
-              child: Text('Simpan', style: TextStyle(fontFamily: 'Lato')),
+              child: Text(
+                'Simpan',
+                style: TextStyle(fontFamily: 'Lato'),
+              ),
             ),
           ],
         ),
@@ -447,50 +554,139 @@ class TambahPengeluaran extends StatelessWidget {
   }
 }
 
-class TambahPemasukan extends StatelessWidget {
+class TambahPemasukan extends StatefulWidget {
   final int dompetId;
-  final TextEditingController _judulController = TextEditingController();
-  final TextEditingController _jumlahController = TextEditingController();
 
   TambahPemasukan({required this.dompetId});
 
   @override
+  _TambahPemasukanState createState() => _TambahPemasukanState();
+}
+
+class _TambahPemasukanState extends State<TambahPemasukan> {
+  final TextEditingController _judulController = TextEditingController();
+  final TextEditingController _jumlahController = TextEditingController();
+  String _selectedKategori = 'Pendapatan';
+  DateTime _selectedDate = DateTime.now();
+
+  final List<String> _kategoriList = ['Pendapatan', 'Beasiswa', 'Lain'];
+
+  void _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.day}-${date.month}-${date.year}";
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Tambah Pemasukan')),
+      appBar: AppBar(
+          title: Text(
+        'Tambah Pemasukan',
+        style: TextStyle(fontFamily: 'Lato'),
+      )),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _judulController,
-              decoration: InputDecoration(labelText: 'Judul'),
+              style: TextStyle(fontFamily: 'Lato'),
+              decoration: InputDecoration(
+                labelText: 'Judul',
+                labelStyle: TextStyle(fontFamily: 'Lato'),
+              ),
             ),
             TextField(
               controller: _jumlahController,
-              decoration: InputDecoration(labelText: 'Jumlah Uang'),
+              style: TextStyle(fontFamily: 'Lato'),
+              decoration: InputDecoration(
+                labelText: 'Jumlah Uang',
+                labelStyle: TextStyle(fontFamily: 'Lato'),
+              ),
               keyboardType: TextInputType.number,
             ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _selectedKategori,
+              items: _kategoriList.map((kategori) {
+                return DropdownMenuItem(
+                  value: kategori,
+                  child: Text(
+                    kategori,
+                    style: TextStyle(fontFamily: 'Lato'),
+                  ),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedKategori = value!;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Kategori',
+                labelStyle: TextStyle(fontFamily: 'Lato'),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    'Tanggal: ${_formatDate(_selectedDate)}',
+                    style: TextStyle(fontSize: 16, fontFamily: 'Lato'),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => _selectDate(context),
+                  child: Text(
+                    'Pilih Tanggal',
+                    style: TextStyle(fontFamily: 'Lato'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 if (_judulController.text.isEmpty ||
                     _jumlahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Semua kolom wajib diisi')),
+                    SnackBar(
+                        content: Text(
+                      'Semua kolom wajib diisi',
+                      style: TextStyle(fontFamily: 'Lato'),
+                    )),
                   );
                   return;
                 }
                 final pemasukan = Pemasukan(
-                  idDompet: dompetId,
+                  idDompet: widget.dompetId,
                   judul: _judulController.text,
-                  kategori: 'Lainnya',
-                  tanggalDibuat: DateTime.now(),
+                  kategori: _selectedKategori,
+                  tanggalDibuat: _selectedDate,
                   jumlahUang: double.tryParse(_jumlahController.text) ?? 0.0,
                 );
                 await DBHelper.insertPemasukan(pemasukan.toMap());
                 Navigator.pop(context, true);
               },
-              child: Text('Simpan'),
+              child: Text(
+                'Simpan',
+                style: TextStyle(fontFamily: 'Lato'),
+              ),
             ),
           ],
         ),
