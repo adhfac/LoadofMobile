@@ -43,6 +43,14 @@ class _DetailDompetState extends State<DetailDompet> {
     return "Rp $integerPart,$decimalPart";
   }
 
+  String _formatDate(DateTime date) {
+    const List<String> bulan = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    return "${date.day} ${bulan[date.month - 1]} ${date.year}";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,10 +59,8 @@ class _DetailDompetState extends State<DetailDompet> {
             style: TextStyle(fontFamily: 'Lato')),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.delete,
-              color: Color.fromARGB(255, 255, 20, 3),
-            ),
+            icon: const Icon(Icons.delete,
+                color: Color.fromARGB(255, 255, 20, 3)),
             onPressed: () {
               _showDeleteConfirmation(context);
             },
@@ -63,105 +69,160 @@ class _DetailDompetState extends State<DetailDompet> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Nama Dompet: ${widget.dompet.namaDompet}',
-                style: TextStyle(fontFamily: 'Lato')),
-            const SizedBox(height: 8),
-            Text('Saldo: ${formatUang(widget.dompet.jumlahUang)}',
-                style: TextStyle(fontFamily: 'Lato')),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () => _navigateToTambahPemasukan(context),
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                        const Color.fromARGB(255, 91, 147, 0)),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Nama Dompet: ${widget.dompet.namaDompet}',
+                        style:
+                            const TextStyle(fontFamily: 'Lato', fontSize: 18),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Saldo: ${formatUang(widget.dompet.jumlahUang)}',
+                        style: const TextStyle(
+                          fontFamily: 'Lato',
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text(
-                    'Tambah Pemasukan',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () => _navigateToTambahPemasukan(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 91, 147, 0),
                     ),
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    label: const Text('Pemasukan',
+                        style:
+                            TextStyle(fontFamily: 'Lato', color: Colors.white)),
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () => _navigateToTambahPengeluaran(context),
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                        const Color.fromARGB(255, 136, 0, 0)),
+                  ElevatedButton.icon(
+                    onPressed: () => _navigateToTambahPengeluaran(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 136, 0, 0),
+                    ),
+                    icon: const Icon(Icons.remove, color: Colors.white),
+                    label: const Text('Pengeluaran',
+                        style:
+                            TextStyle(fontFamily: 'Lato', color: Colors.white)),
                   ),
-                  child: const Text('Tambah Pengeluaran',
-                      style:
-                          TextStyle(fontFamily: 'Lato', color: Colors.white)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: FutureBuilder(
+                ],
+              ),
+              const SizedBox(height: 16),
+              FutureBuilder(
                 future: Future.wait([_pemasukanList, _pengeluaranList]),
                 builder: (context, AsyncSnapshot snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(
-                        child: Text('Error: ${snapshot.error}',
-                            style: TextStyle(fontFamily: 'Lato')));
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(fontFamily: 'Lato'),
+                      ),
+                    );
                   } else {
                     final pemasukanList =
                         snapshot.data[0] as List<Map<String, dynamic>>;
                     final pengeluaranList =
                         snapshot.data[1] as List<Map<String, dynamic>>;
 
-                    return ListView(
+                    return Column(
                       children: [
-                        ...pemasukanList.map((data) {
-                          final pemasukan = Pemasukan.fromMap(data);
-                          return ListTile(
-                            leading:
-                                Icon(Icons.arrow_downward, color: Colors.green),
-                            title: Text(pemasukan.judul,
-                                style: TextStyle(fontFamily: 'Lato')),
-                            subtitle: Text(formatUang(pemasukan.jumlahUang),
-                                style: TextStyle(fontFamily: 'Lato')),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                await _deletePemasukan(pemasukan.idPemasukan!);
-                              },
-                            ),
-                          );
-                        }).toList(),
-                        ...pengeluaranList.map((data) {
-                          final pengeluaran = Pengeluaran.fromMap(data);
-                          return ListTile(
-                            leading:
-                                Icon(Icons.arrow_upward, color: Colors.red),
-                            title: Text(pengeluaran.judul,
-                                style: TextStyle(fontFamily: 'Lato')),
-                            subtitle: Text(formatUang(pengeluaran.jumlahUang),
-                                style: TextStyle(fontFamily: 'Lato')),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                await _deletePengeluaran(
-                                    pengeluaran.idPengeluaran!);
-                              },
-                            ),
-                          );
-                        }).toList(),
+                        _buildSectionHeader(
+                            'Pemasukan', Icons.arrow_downward, Colors.green),
+                        ...pemasukanList.map((data) => _buildListItem(
+                              data: Pemasukan.fromMap(data),
+                              icon: Icons.arrow_downward,
+                              iconColor: Colors.green,
+                              onDelete: () async =>
+                                  await _deletePemasukan(data['idPemasukan']),
+                            )),
+                        const Divider(),
+                        _buildSectionHeader(
+                            'Pengeluaran', Icons.arrow_upward, Colors.red),
+                        ...pengeluaranList.map((data) => _buildListItem(
+                              data: Pengeluaran.fromMap(data),
+                              icon: Icons.arrow_upward,
+                              iconColor: Colors.red,
+                              onDelete: () async => await _deletePengeluaran(
+                                  data['idPengeluaran']),
+                            )),
                       ],
                     );
                   }
                 },
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontFamily: 'Lato',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildListItem({
+    required dynamic data,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onDelete,
+  }) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 2,
+      child: ListTile(
+        leading: Icon(icon, color: iconColor),
+        title: Text(data.judul, style: const TextStyle(fontFamily: 'Lato')),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(formatUang(data.jumlahUang),
+                style: const TextStyle(fontFamily: 'Lato')),
+            Text(_formatDate(data.tanggalDibuat),  style: const TextStyle(fontFamily: 'Lato'))
           ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.delete, color: Colors.red),
+          onPressed: onDelete,
         ),
       ),
     );
